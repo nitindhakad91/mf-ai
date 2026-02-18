@@ -1,5 +1,7 @@
 import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def db():
@@ -9,4 +11,4 @@ def db():
 
 
 def summaries():
-    return db()[os.getenv("SUMMARY_COLLECTION", "summary_collection")]
+    return db()[os.getenv("SUMMARY_COLLECTION", "log_summaries")]

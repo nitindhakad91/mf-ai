@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 def _db():
     uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-    db_name = os.getenv("MONGO_DB", "mainframe_poc")
+    db_name = os.getenv("MONGO_DB", "mf-ai")
     return MongoClient(uri)[db_name]
 
 

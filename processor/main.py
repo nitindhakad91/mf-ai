@@ -1,19 +1,19 @@
 import os
 from dotenv import load_dotenv
+load_dotenv()
 
 from mongo_reader import get_raw_logs
 from chunker import chunk_text
 from llm_client import call_bedrock_claude
 from mongo_writer import upsert_summary
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 
 def build_prompt(raw: str) -> str:
     return (
         "Explain the following mainframe log in simple English. "
         "Identify likely error cause and suggest possible fix steps. "
-        "Keep it concise and actionable."
+        "Keep it concise and actionable with job id"
         f"LOG:{raw}"
     )
 

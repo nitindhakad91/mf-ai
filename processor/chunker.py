@@ -1,5 +1,6 @@
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 
 def chunk_text(text: str) -> list[str]:
     chunk_size = int(os.getenv("CHUNK_SIZE", "8000"))
