@@ -33,3 +33,14 @@ export async function chat(question) {
   }
   return r.json()
 }
+
+
+// ✅ NEW: fixed sample OCR by id (NO UPLOAD)
+// src/api.js
+export async function ocrById(id) {
+  const res = await fetch(`${API_BASE}/ocr/${id}`);
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+  return res.json();
+}

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { chat, latest, search as searchApi, health } from './api'
+import { chat, latest, search as searchApi, health, ocrById } from './api'
 import ChatMessage from './components/ChatMessage'
 import SidebarItem from './components/SidebarItem'
+import ImageOcrModal from './components/ImageOcrModal'
 
 export default function App() {
   const [messages, setMessages] = useState([
@@ -16,6 +17,24 @@ export default function App() {
   const [searchItems, setSearchItems] = useState([])
 
   const bottomRef = useRef(null)
+
+  
+  const sampleImages = [
+    { id: 1, src: '/samples/1.png', label: 'Sample 1' },
+    { id: 2, src: '/samples/2.png', label: 'Sample 2' },
+    { id: 3, src: '/samples/3.png', label: 'Sample 3' },
+    { id: 4, src: '/samples/4.png', label: 'Sample 4' },
+    { id: 5, src: '/samples/5.png', label: 'Sample 5' },
+    { id: 6, src: '/samples/6.png', label: 'Sample 6' },
+  ];
+
+  
+// ✅ Modal / OCR state
+  const [imgModalOpen, setImgModalOpen] = useState(false);
+  const [selectedImgIdx, setSelectedImgIdx] = useState(0);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [extractedText, setExtractedText] = useState('');
+
 
   useEffect(() => {
     (async () => {
@@ -59,6 +78,37 @@ export default function App() {
     }
   }
 
+  
+// ✅ Open modal from sidebar click
+  function openImage(idx) {
+    setSelectedImgIdx(idx);
+    setExtractedText('');
+    setImgModalOpen(true);
+  }
+
+  
+  // ✅ Close modal -> returns to main page
+  function closeImageModal() {
+    setImgModalOpen(false);
+    setExtractedText('');
+  }
+
+  
+  // ✅ Convert fixed sample (NO UPLOAD) -> calls backend /ocr/{id}
+  async function convertSelectedImage() {
+    const img = sampleImages[selectedImgIdx];
+    setOcrLoading(true);
+    try {
+      const res = await ocrById(img.id);
+      setExtractedText(res.text || '');
+    } catch (e) {
+      setExtractedText(`Error: ${e.message}`);
+    } finally {
+      setOcrLoading(false);
+    }
+  }
+
+
   const pill = apiOk === null
     ? { text: 'Checking API…', cls: 'bg-white/5 border-white/10 text-slate-300' }
     : apiOk
@@ -70,6 +120,23 @@ export default function App() {
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-24 left-1/2 h-[380px] w-[780px] -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-500/20 via-indigo-500/15 to-emerald-400/15 blur-3xl" />
       </div>
+
+  {/* ✅ Maximized modal */}
+      <ImageOcrModal
+        open={imgModalOpen}
+        images={sampleImages}
+        selectedIndex={selectedImgIdx}
+        onSelect={(idx) => {
+          setSelectedImgIdx(idx);
+          setExtractedText('');
+        }}
+        
+        onClose={closeImageModal}
+        onConvert={convertSelectedImage}
+        converting={ocrLoading}
+        extractedText={extractedText}
+      />
+
 
       <div className="relative mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[360px_1fr]">
         <aside className="hidden lg:flex flex-col gap-4 border-r border-white/10 bg-white/[0.03] p-5">
@@ -118,6 +185,32 @@ export default function App() {
             </div>
             <div className="mt-4 text-xs text-slate-400">Set <code className="text-sky-300">VITE_API_BASE</code> in <code className="text-sky-300">.env</code></div>
           </div>
+          
+{/* ✅ Sample images (fixed) */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-semibold">Sample images</div>
+              <div className="text-[11px] text-slate-400">Click any to maximize</div>
+            </div>
+
+<div className="grid grid-cols-3 gap-3">
+              {sampleImages.map((img, idx) => (
+                <button
+                  key={img.id}
+                  onClick={() => openImage(idx)}
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10"
+                  title={img.label}
+                >
+
+                <img src={img.src}
+                    alt={img.label}
+                    className="h-20 w-full object-cover transition group-hover:scale-[1.02]"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
         </aside>
 
         <main className="flex min-h-screen flex-col">
