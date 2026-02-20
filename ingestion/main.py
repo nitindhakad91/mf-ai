@@ -40,6 +40,7 @@ def image_to_text(image_path: str) -> str:
     processed = Image.fromarray(thresh)
  
     text = pytesseract.image_to_string(processed)
+    text = text.replace("J0B", "JOB")
     return text.strip()
  
  

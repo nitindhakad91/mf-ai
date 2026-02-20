@@ -11,6 +11,7 @@ from mongo_writer import upsert_summary
 
 def build_prompt(raw: str) -> str:
     return (
+        "On top of response mention the JOBID and status in one word and in this format Status=Abended/Failed/Successful. "
         "Explain the following mainframe log in simple English. "
         "Identify likely error cause and suggest possible fix steps. "
         "Keep it concise and actionable with job id"

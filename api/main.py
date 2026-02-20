@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import re
+from mongo_db import summaries
 
 from PIL import Image, ImageOps
 import pytesseract
@@ -63,8 +65,38 @@ def health():
 
 
 @app.get("/latest")
-def get_latest(limit: int = 10):
-    return {"items": latest(limit)}
+def get_latest_jobids(limit: int = 5):
+    col = summaries()
+ 
+    # include created_at in projection for safe sorting
+    docs = (
+        col.find({}, {"summary": 1, "created_at": 1})
+           .sort("created_at", -1)
+           .limit(limit)
+    )
+ 
+    results = []
+ 
+    job_pattern = r"\bJOB[0-9]+\b"
+    status_pattern = r"Status\s*=\s*([A-Za-z]+)"
+ 
+    for doc in docs:
+        summary = doc.get("summary", "")
+ 
+        job_match = re.search(job_pattern, summary)
+        jobid = job_match.group(0) if job_match else None
+ 
+        status_match = re.search(status_pattern, summary)
+        status = status_match.group(1) if status_match else None
+ 
+        if jobid:
+            results.append({
+                "jobid": jobid,
+                "status": status
+            })
+ 
+    # ✅ keep as results since your frontend will consume res.results
+    return {"results": results}
 
 
 @app.get("/search")
@@ -75,3 +107,4 @@ def get_search(q: str, limit: int = 10):
 @app.post("/chat")
 def chat(req: ChatRequest):
     return {"answer": answer(req.question)}
+
