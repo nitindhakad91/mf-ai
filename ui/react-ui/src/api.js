@@ -5,7 +5,13 @@ export async function health() {
   if (!r.ok) throw new Error('health failed')
   return r.json()
 }
- 
+
+export async function todaySummary() {
+  const r = await fetch(`${API_BASE}/today-summary`)
+  if (!r.ok) throw new Error(`today-summary failed: ${r.status}`)
+  return r.json()
+}
+
 export async function latest(limit = 5) {
   const r = await fetch(`${API_BASE}/latest?limit=${limit}`)
   if (!r.ok) throw new Error('latest failed')

@@ -1,64 +1,83 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { chat, latest, search as searchApi, health, ocrById, sendEmail } from './api'
-import ChatMessage from './components/ChatMessage'
-import SidebarItem from './components/SidebarItem'
-import ImageOcrModal from './components/ImageOcrModal'
-import ReviewSendModal from './components/ReviewSendModal'
+import React, { useEffect, useRef, useState } from "react"
+import { chat, latest, search as searchApi, health, ocrById, sendEmail } from "./api"
+import ChatMessage from "./components/ChatMessage"
+import SidebarItem from "./components/SidebarItem"
+import ImageOcrModal from "./components/ImageOcrModal"
+import ReviewSendModal from "./components/ReviewSendModal"
+import DashboardModal from "./components/DashboardModal"
  
 export default function App() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hi! Ask me about the mainframe logs (e.g., “Why did ABC123 fail?”)' }
+    {
+      role: "assistant",
+      content: 'Hi! Ask me about the mainframe logs (e.g., "Why did ABC123 fail?")',
+    },
   ])
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [apiOk, setApiOk] = useState(null)
  
   const [latestItems, setLatestItems] = useState([])
-  const [searchQ, setSearchQ] = useState('')
+  const [searchQ, setSearchQ] = useState("")
   const [searchItems, setSearchItems] = useState([])
  
   const bottomRef = useRef(null)
  
   const sampleImages = [
-    { id: 1, src: '/samples/1.png', label: 'Sample 1' },
-    { id: 2, src: '/samples/2.png', label: 'Sample 2' },
-    { id: 3, src: '/samples/3.png', label: 'Sample 3' },
-    { id: 4, src: '/samples/4.png', label: 'Sample 4' },
-    { id: 5, src: '/samples/5.png', label: 'Sample 5' },
-    { id: 6, src: '/samples/6.png', label: 'Sample 6' },
+    { id: 1, src: "/samples/1.png", label: "Sample 1" },
+    { id: 2, src: "/samples/2.png", label: "Sample 2" },
+    { id: 3, src: "/samples/3.png", label: "Sample 3" },
+    { id: 4, src: "/samples/4.png", label: "Sample 4" },
+    { id: 5, src: "/samples/5.png", label: "Sample 5" },
+    { id: 6, src: "/samples/6.png", label: "Sample 6" },
   ]
  
   // ✅ Modal / OCR state
   const [imgModalOpen, setImgModalOpen] = useState(false)
   const [selectedImgIdx, setSelectedImgIdx] = useState(0)
   const [ocrLoading, setOcrLoading] = useState(false)
-  const [extractedText, setExtractedText] = useState('')
+  const [extractedText, setExtractedText] = useState("")
  
   // ✅ Review & Send modal state
   const [reviewOpen, setReviewOpen] = useState(false)
   const [reviewMsgIdx, setReviewMsgIdx] = useState(null)
-  const [draftAnswer, setDraftAnswer] = useState('')
-  const [draftEmail, setDraftEmail] = useState('')
+  const [draftAnswer, setDraftAnswer] = useState("")
+  const [draftEmail, setDraftEmail] = useState("")
   const [savingDraft, setSavingDraft] = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
-  const [reviewStatus, setReviewStatus] = useState('')
+  const [reviewStatus, setReviewStatus] = useState("")
+ 
+  // ✅ Dashboard modal state (only open/close needed now)
+  const [dashOpen, setDashOpen] = useState(false)
+ 
+function openDashboard() { setDashOpen(true) }
+function closeDashboard() { setDashOpen(false) }
+ 
+<DashboardModal open={dashOpen} onClose={closeDashboard} />
  
   useEffect(() => {
-    (async () => {
-      try { await health(); setApiOk(true) } catch { setApiOk(false) }
+    ;(async () => {
+      try {
+        await health()
+        setApiOk(true)
+      } catch {
+        setApiOk(false)
+      }
     })()
   }, [])
  
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, loading])
  
   // ✅ Refresh Latest -> show JOBID + STATUS only
   async function refreshLatest() {
     try {
       const res = await latest(10)
-      setLatestItems(res.results || [])  // ✅ changed from res.items
-    } catch (e) { console.error(e) }
+      setLatestItems(res.results || res.items || [])
+    } catch (e) {
+      console.error(e)
+    }
   }
  
   async function doSearch() {
@@ -66,7 +85,9 @@ export default function App() {
     try {
       const res = await searchApi(searchQ.trim(), 10)
       setSearchItems(res.items || [])
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error(e)
+    }
   }
  
   async function onSend(e) {
@@ -74,15 +95,18 @@ export default function App() {
     const q = input.trim()
     if (!q || loading) return
  
-    setMessages(prev => [...prev, { role: 'user', content: q }])
-    setInput('')
+    setMessages((prev) => [...prev, { role: "user", content: q }])
+    setInput("")
     setLoading(true)
  
     try {
       const res = await chat(q)
-      setMessages(prev => [...prev, { role: 'assistant', content: res.answer || '' }])
+      setMessages((prev) => [...prev, { role: "assistant", content: res.answer || "" }])
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${err.message}` }])
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Error: ${err.message}` },
+      ])
     } finally {
       setLoading(false)
     }
@@ -91,14 +115,14 @@ export default function App() {
   // ✅ Open OCR modal from sidebar click
   function openImage(idx) {
     setSelectedImgIdx(idx)
-    setExtractedText('')
+    setExtractedText("")
     setImgModalOpen(true)
   }
  
   // ✅ Close OCR modal
   function closeImageModal() {
     setImgModalOpen(false)
-    setExtractedText('')
+    setExtractedText("")
   }
  
   // ✅ Convert fixed sample (NO UPLOAD)
@@ -107,7 +131,7 @@ export default function App() {
     setOcrLoading(true)
     try {
       const res = await ocrById(img.id)
-      setExtractedText(res.text || '')
+      setExtractedText(res.text || "")
     } catch (e) {
       setExtractedText(`Error: ${e.message}`)
     } finally {
@@ -118,58 +142,58 @@ export default function App() {
   // ✅ Open review modal for a specific assistant message
   function openReviewForMessage(idx) {
     const msg = messages[idx]
-    if (!msg || msg.role !== 'assistant') return
+    if (!msg || msg.role !== "assistant") return
  
     setReviewMsgIdx(idx)
-    setDraftAnswer(msg.content || '')
-    setDraftEmail('')
-    setReviewStatus('')
+    setDraftAnswer(msg.content || "")
+    setDraftEmail("")
+    setReviewStatus("")
     setReviewOpen(true)
   }
  
   function closeReviewModal() {
     setReviewOpen(false)
     setReviewMsgIdx(null)
-    setDraftAnswer('')
-    setDraftEmail('')
-    setReviewStatus('')
+    setDraftAnswer("")
+    setDraftEmail("")
+    setReviewStatus("")
   }
  
   async function saveEditedAnswer() {
     if (reviewMsgIdx == null) return
     setSavingDraft(true)
     try {
-      setMessages(prev => {
+      setMessages((prev) => {
         const copy = [...prev]
         copy[reviewMsgIdx] = { ...copy[reviewMsgIdx], content: draftAnswer }
         return copy
       })
-      setReviewStatus('✅ Saved edited answer into chat.')
+      setReviewStatus("✅ Saved edited answer into chat.")
     } finally {
       setSavingDraft(false)
     }
   }
  
   async function sendEditedAnswer() {
-    const to = (draftEmail || '').trim()
-    const body = (draftAnswer || '').trim()
+    const to = (draftEmail || "").trim()
+    const body = (draftAnswer || "").trim()
  
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)
     if (!emailOk) {
-      setReviewStatus('❌ Please enter a valid email address.')
+      setReviewStatus("❌ Please enter a valid email address.")
       return
     }
     if (!body) {
-      setReviewStatus('❌ Answer is empty. Please add content before sending.')
+      setReviewStatus("❌ Answer is empty. Please add content before sending.")
       return
     }
  
     setSendingEmail(true)
-    setReviewStatus('')
+    setReviewStatus("")
     try {
       await sendEmail({
         to,
-        subject: 'Mainframe Log Assistant Response',
+        subject: "Mainframe Log Assistant Response",
         body,
       })
       setReviewStatus(`✅ Sent email to ${to}`)
@@ -180,11 +204,27 @@ export default function App() {
     }
   }
  
-  const pill = apiOk === null
-    ? { text: 'Checking API…', cls: 'bg-white/5 border-white/10 text-slate-300' }
-    : apiOk
-      ? { text: 'API Connected', cls: 'bg-emerald-500/10 border-emerald-400/30 text-emerald-200' }
-      : { text: 'API Not Reachable', cls: 'bg-rose-500/10 border-rose-400/30 text-rose-200' }
+  // ✅ Dashboard open/close (NO latest(200) here anymore)
+  function openDashboard() {
+    setDashOpen(true)
+  }
+ 
+  function closeDashboard() {
+    setDashOpen(false)
+  }
+ 
+  const pill =
+    apiOk === null
+      ? { text: "Checking API…", cls: "bg-white/5 border-white/10 text-slate-300" }
+      : apiOk
+        ? {
+            text: "API Connected",
+            cls: "bg-emerald-500/10 border-emerald-400/30 text-emerald-200",
+          }
+        : {
+            text: "API Not Reachable",
+            cls: "bg-rose-500/10 border-rose-400/30 text-rose-200",
+          }
  
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -199,7 +239,7 @@ export default function App() {
         selectedIndex={selectedImgIdx}
         onSelect={(idx) => {
           setSelectedImgIdx(idx)
-          setExtractedText('')
+          setExtractedText("")
         }}
         onClose={closeImageModal}
         onConvert={convertSelectedImage}
@@ -223,6 +263,9 @@ export default function App() {
         statusText={reviewStatus}
       />
  
+      {/* ✅ Dashboard modal (fetches /today-summary internally) */}
+      <DashboardModal open={dashOpen} onClose={closeDashboard} />
+ 
       <div className="relative mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[360px_1fr]">
         <aside className="hidden lg:flex flex-col gap-4 border-r border-white/10 bg-white/[0.03] p-5">
           <div className="flex items-center justify-between">
@@ -230,7 +273,9 @@ export default function App() {
               <div className="text-sm font-extrabold tracking-wide">POC MF AI</div>
               <div className="text-xs text-slate-300">Hackathon UI (Tailwind)</div>
             </div>
-            <div className={`rounded-full border px-3 py-1 text-[11px] ${pill.cls}`}>{pill.text}</div>
+            <div className={`rounded-full border px-3 py-1 text-[11px] ${pill.cls}`}>
+              {pill.text}
+            </div>
           </div>
  
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -244,43 +289,44 @@ export default function App() {
               </button>
             </div>
  
-           <div className="grid gap-1.5">
-  {latestItems.length === 0 ? (
-    <div className="text-[11px] text-slate-300">No jobs yet. Click Refresh.</div>
-  ) : latestItems.slice(0, 5).map((it, idx) => {
-    const jobid = it.jobid || 'UNKNOWN_JOB'
-    const status = (it.status || 'N/A').toUpperCase()
+            <div className="grid gap-1.5">
+              {latestItems.length === 0 ? (
+                <div className="text-[11px] text-slate-300">No jobs yet. Click Refresh.</div>
+              ) : (
+                latestItems.slice(0, 5).map((it, idx) => {
+                  const jobid = it.jobid || "UNKNOWN_JOB"
+                  const status = (it.status || "N/A").toUpperCase()
  
-    const statusCls =
-      status === 'SUCCESS' || status === 'OK' || status === 'COMPLETED'
-        ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/30'
-        : status === 'FAILED' || status === 'ERROR' || status === 'ABEND'
-          ? 'bg-rose-500/15 text-rose-200 border-rose-400/30'
-          : status === 'RUNNING' || status === 'INPROGRESS'
-            ? 'bg-amber-500/15 text-amber-200 border-amber-400/30'
-            : 'bg-white/10 text-slate-200 border-white/10'
+                  const statusCls =
+                    status === "SUCCESS" || status === "OK" || status === "COMPLETED"
+                      ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/30"
+                      : status === "FAILED" || status === "ERROR" || status === "ABEND"
+                        ? "bg-rose-500/15 text-rose-200 border-rose-400/30"
+                        : status === "RUNNING" || status === "INPROGRESS"
+                          ? "bg-amber-500/15 text-amber-200 border-amber-400/30"
+                          : "bg-white/10 text-slate-200 border-white/10"
  
-    return (
-      <div
-        key={`${jobid}-${idx}`}
-        className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5"
-      >
-        {/* Job ID (left) */}
-        <div className="text-[11px] font-semibold tracking-wide text-slate-100 truncate">
-          {jobid}
-        </div>
+                  return (
+                    <div
+                      key={`${jobid}-${idx}`}
+                      className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5"
+                    >
+                      <div className="truncate text-[11px] font-semibold tracking-wide text-slate-100">
+                        {jobid}
+                      </div>
  
-        {/* Status pill (right) */}
-        <div className={`shrink-0 rounded-full border px-2 py-[2px] text-[10px] font-bold ${statusCls}`}>
-          {status}
-        </div>
-      </div>
-    )
-  })}
-</div>
+                      <div
+                        className={`shrink-0 rounded-full border px-2 py-[2px] text-[10px] font-bold ${statusCls}`}
+                      >
+                        {status}
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </div>
  
-          {/* ✅ Sample images */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm font-semibold">Sample images</div>
@@ -313,7 +359,20 @@ export default function App() {
                 <div className="text-base font-extrabold">Mainframe Log Chatbot</div>
                 <div className="text-xs text-slate-300">FastAPI backend + Bedrock summaries</div>
               </div>
-              <div className={`rounded-full border px-3 py-1 text-[11px] lg:hidden ${pill.cls}`}>{pill.text}</div>
+ 
+              {/* ✅ Dashboard button */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={openDashboard}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-100 hover:bg-white/10"
+                >
+                  Dashboard
+                </button>
+ 
+                <div className={`rounded-full border px-3 py-1 text-[11px] ${pill.cls}`}>
+                  {pill.text}
+                </div>
+              </div>
             </div>
           </header>
  
@@ -323,7 +382,7 @@ export default function App() {
                 key={idx}
                 role={m.role}
                 content={m.content}
-                onReview={m.role === 'assistant' ? () => openReviewForMessage(idx) : undefined}
+                onReview={m.role === "assistant" ? () => openReviewForMessage(idx) : undefined}
               />
             ))}
             {loading && <ChatMessage role="assistant" content="Thinking…" />}

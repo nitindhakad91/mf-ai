@@ -15,6 +15,7 @@ def build_prompt(raw: str) -> str:
         "Explain the following mainframe log in simple English. "
         "Identify likely error cause and suggest possible fix steps. "
         "Keep it concise and actionable with job id"
+        "Store the code lines in response where it is failed or abended "
         f"LOG:{raw}"
     )
 

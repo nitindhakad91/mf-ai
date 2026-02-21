@@ -50,8 +50,8 @@ export default function ReviewSendModal({
       />
  
       {/* Modal */}
-      <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6">
-        <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
+      <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-6">
+        <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-4">
             <div>
@@ -63,7 +63,7 @@ export default function ReviewSendModal({
  
             <button
               onClick={onClose}
-              className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs hover:bg-white/10"
+              className="rounded-2xl border border-white/10 bg-white/5 px-3 py-5 text-xs hover:bg-white/10"
               title="Close (Esc)"
             >
               ✕ Close
