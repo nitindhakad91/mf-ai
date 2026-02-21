@@ -170,7 +170,7 @@ def today_summary():
                 "status": status
             })
 
-            if status in ["success", "passed", "ok"]:
+            if status in ["success", "passed", "ok", "successful"]:
                 success_count += 1
             elif status in ["fail", "failed", "abended", "abend"]:
                 failed_count += 1
