@@ -270,8 +270,8 @@ function closeDashboard() { setDashOpen(false) }
         <aside className="hidden lg:flex flex-col gap-4 border-r border-white/10 bg-white/[0.03] p-5">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-extrabold tracking-wide">POC MF AI</div>
-              <div className="text-xs text-slate-300">Hackathon UI (Tailwind)</div>
+              <div className="text-sm font-extrabold tracking-wide">Mainframe Chatbot</div>
+              <div className="text-xs text-slate-300">Mainlytics</div>
             </div>
             <div className={`rounded-full border px-3 py-1 text-[11px] ${pill.cls}`}>
               {pill.text}
@@ -357,7 +357,7 @@ function closeDashboard() { setDashOpen(false) }
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-base font-extrabold">Mainframe Log Chatbot</div>
-                <div className="text-xs text-slate-300">FastAPI backend + Bedrock summaries</div>
+                <div className="text-xs text-slate-300">AI Enabled</div>
               </div>
  
               {/* ✅ Dashboard button */}
@@ -406,8 +406,8 @@ function closeDashboard() { setDashOpen(false) }
               </button>
             </div>
             <div className="mt-2 text-[11px] text-slate-400">
-              Tip: Try <span className="text-slate-200">"Show recent abends"</span> or{" "}
-              <span className="text-slate-200">"What caused RC=08"</span>.
+              Tip: Try <span className="text-slate-200">"What is the status of AB123 Job"</span> or{" "}
+              <span className="text-slate-200">"Solutions for JOB123"</span>.
             </div>
           </form>
         </main>
